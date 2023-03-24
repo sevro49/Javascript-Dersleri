@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
+            crossorigin="anonymous"
+        />
+
+        <title>Event Listeners</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Todo App</div>
+                        <div class="card-body">
+                            <form>
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        id="txtTaskName"
+                                        class="form-control"
+                                    />
+                                    <button
+                                        class="btn btn-primary"
+                                        id="btnAddNewTask"
+                                        type="submit"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <button
+                                id="btnClear"
+                                class="btn btn-danger btn-sm float-end"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                        <ul
+                            id="task-list"
+                            class="list-group list-group-flush"
+                        ></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let result;
+
+            let jobList = [
+                { id: 1, jobTitle: "Job 1" },
+                { id: 2, jobTitle: "Job 2" },
+                { id: 3, jobTitle: "Job 3" },
+                { id: 4, jobTitle: "Job 4" },
+            ];
+
+            let ul = document.getElementById("task-list");
+
+            for (let job of jobList) {
+                let li = `
+                <li class="task list-group-item">
+                    <div class="form-check">
+                        <input
+                            type="checkbox"
+                            id="${job.id}"
+                            class="form-check-input"
+                        />
+                        <label for="${job.id}" class="form-check-label"
+                            >${job.jobTitle}</label
+                        >
+                    </div>
+                </li>
+            `;
+
+                ul.insertAdjacentHTML("beforeend", li);
+            }
+
+            /**
+             * let btnAdd = document.querySelector("#btnAddNewTask");
+            btnAdd.addEventListener("click", function (event) {
+                console.log("Added Job");
+
+                // to stop the submit button reloading page
+                event.preventDefault();
+            });
+            */
+
+            /**
+             * * another usage
+            btnAdd = document.querySelector("#btnAddNewTask").addEventListener("click", function (event) {
+                console.log("Added Job");
+
+                // to stop the submit button reloading page
+                event.preventDefault();
+            });
+            */
+
+            /**
+             * let btnClear = document.querySelector("#btnClear");
+            btnClear.addEventListener("click", clear);
+
+            function clear(){
+                console.log("Cleared Job");
+            }
+            */
+
+            document.querySelector("#btnAddNewTask").addEventListener("click", newTask);
+
+            function newTask(event){
+
+                // we can reach the button's reference which runs event
+                // console.log(event.target);
+                event.target.classList.add("btn-lg")
+
+                event.preventDefault();
+            }
+        </script>
+    </body>
+</html>
