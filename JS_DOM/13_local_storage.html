@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="stylle.css" />
+
+        <title>Local Storage</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Todo App</div>
+                        <div class="card-body">
+                            <form>
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        id="txtTaskName"
+                                        class="form-control"
+                                    />
+                                    <button
+                                        class="btn btn-primary"
+                                        id="btnAddNewTask"
+                                        type="submit"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header controls">
+                            <div class="filters">
+                                <span class="active" id="all">All</span>
+                                <span id="pending">Pending</span>
+                                <span id="completed">Completed</span>
+                            </div>
+                            <button
+                                id="btnClear"
+                                class="btn btn-danger btn-sm float-end"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                        <ul
+                            id="task-list"
+                            class="list-group list-group-flush"
+                        ></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            let jobList = [];
+
+            // to store tasks into storage
+            if (localStorage.getItem("jobList") !== null){
+                jobList = JSON.parse(localStorage.getItem("jobList"));
+            }
+
+            let editId;
+            let isEditTask = false;
+
+            const taskInput = document.querySelector("#txtTaskName");
+            const btnClear = document.querySelector("#btnClear");
+            const filters = document.querySelectorAll(".filters span");
+
+            displayTask(document.querySelector("span.active").id);
+
+            function displayTask(filter) {
+                let ul = document.getElementById("task-list");
+
+                // deletes li elements under ul
+                ul.innerHTML = "";
+
+                if (jobList.length == 0) {
+                    ul.innerHTML = "<p class='p-3 m-0'>Task List is Empty!</p>";
+                } else {
+                    for (let job of jobList) {
+                        let completed =
+                            job.status == "completed" ? "checked" : "";
+
+                        if (filter == job.status || filter == "all") {
+                            let li = `
+                            <li class="task list-group-item">
+                                <div class="form-check">
+                                    <input
+                                        type="checkbox"
+                                        onclick="updateStatus(this)"
+                                        id="${job.id}"
+                                        class="form-check-input" ${completed}
+                                    />
+                                    <label for="${job.id}" class="form-check-label ${completed}"
+                                        >${job.jobTitle}</label
+                                    >
+                                </div>
+
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-link dropdown-toggle"
+                                        type="button"
+                                        id="dropdownMenuButton1"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        <i class="fa-solid fa-ellipsis"></i>
+                                    </button>
+                                    <ul
+                                        class="dropdown-menu"
+                                        aria-labelledby="dropdownMenuButton1"
+                                    >
+                                        <li>
+                                            <a href="#" onclick="deleteTask(${job.id})" class="dropdown-item"
+                                                ><i
+                                                    class="fa-solid fa-trash-can"
+                                                ></i> Delete</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" onclick='editTask(${job.id}, "${job.jobTitle}")' class="dropdown-item"
+                                                ><i
+                                                    class="fa-solid fa-pen"
+                                                ></i> Edit</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </li>
+                        `;
+
+                            ul.insertAdjacentHTML("beforeend", li);
+                        }
+                    }
+                }
+            }
+
+            document
+                .querySelector("#btnAddNewTask")
+                .addEventListener("click", newTask);
+
+            document
+                .querySelector("#btnAddNewTask")
+                .addEventListener("keypress", function () {
+                    if (event.key == "Enter") {
+                        document.getElementById("btnAddNewTask").click();
+                    }
+                });
+
+            for (let span of filters) {
+                span.addEventListener("click", function () {
+                    document
+                        .querySelector("span.active")
+                        .classList.remove("active");
+                    span.classList.add("active");
+
+                    // for filters
+                    displayTask(span.id);
+                });
+            }
+
+            function newTask(event) {
+                if (taskInput.value == "") {
+                    alert("You have to type something");
+                } else {
+                    if (!isEditTask) {
+                        // adding
+                        jobList.push({
+                            id: jobList.length + 1,
+                            jobTitle: taskInput.value,
+                            status: "pending",
+                        });
+                        taskInput.value = "";
+                    } else {
+                        //updating
+                        for (let job of jobList) {
+                            if (job.id == editId) {
+                                job.jobTitle = taskInput.value;
+                            }
+                            isEditTask = false;
+                        }
+                    }
+                    displayTask(document.querySelector("span.active").id);
+                    localStorage.setItem("jobList", JSON.stringify(jobList));
+                }
+
+                event.preventDefault();
+            }
+
+            function deleteTask(id) {
+                let deletedId;
+
+                for (let index in jobList) {
+                    if (jobList[index].id == id) {
+                        deletedId = index;
+                    }
+                }
+
+                jobList.splice(deletedId, 1);
+                displayTask(document.querySelector("span.active").id);
+                localStorage.setItem("jobList", JSON.stringify(jobList));
+            }
+
+            function editTask(jobId, jobTitle) {
+                editId = jobId;
+                isEditTask = true;
+                taskInput.value = jobTitle;
+                taskInput.focus();
+                taskInput.classList.add("active");
+
+                console.log("edit id: ", jobId);
+                console.log("edit mode: ", isEditTask);
+            }
+
+            btnClear.addEventListener("click", function () {
+                jobList.splice(0, jobList.length);
+                localStorage.setItem("jobList", JSON.stringify(jobList));
+                displayTask();
+            });
+
+            function updateStatus(selectedTask) {
+                let label = selectedTask.nextElementSibling;
+                let status;
+
+                if (selectedTask.checked) {
+                    label.classList.add("checked");
+                    status = "completed";
+                } else {
+                    label.classList.remove("checked");
+                    status = "pending";
+                }
+
+                for (let job of jobList) {
+                    if (job.id == selectedTask.id) {
+                        job.status = status;
+                    }
+                }
+
+                // no need to change tabs to reload task status
+                displayTask(document.querySelector("span.active").id)
+
+                localStorage.setItem("jobList", JSON.stringify(jobList));
+            }
+        </script>
+    </body>
+</html>
